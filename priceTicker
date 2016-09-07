@@ -1,0 +1,25 @@
+import "lib/std.sol";
+import "lib/oraclizeAPI.sol";
+
+contract PriceTicker is usingOraclize {
+    
+    address owner;
+    uint public USDETH;
+    
+    function PriceTicker() {
+        owner = msg.sender;
+        oraclize_setNetwork(networkID_consensys);
+        oraclize_setProof(proofType_TLSNotary | proofStorage_IPFS);
+        update();
+    }
+    
+    function __callback(bytes32 myid, string result, bytes proof) {
+        if (msg.sender != oraclize_cbAddress()) throw;
+        USDETH = parseInt(result,6);
+       // update();
+    }
+    
+    function update() {
+        oraclize_query("URL", "json(t).result.XETHXXBT.c.0");
+    }
+}
